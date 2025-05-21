@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment files
+.env
+.env.*
+
+# Conda environments (if exported locally)
+*.conda
+*.yaml
+
+# VS Code settings
+.vscode/
+
+# Output logs and cache
+*.log
+*.sqlite3
+*.db
+*.json
+*.csv
+data/
+output/
+
+# Jupyter/IPython history
+.ipynb_checkpoints
+
+# OS junk
+.DS_Store
+Thumbs.db

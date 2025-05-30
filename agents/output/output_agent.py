@@ -1,17 +1,23 @@
 # agents/output/output_agent.py
 
-from typing import List, Dict
+import json
+import os
 
 class OutputAgent:
-    def display(self, jobs: List[Dict]):
-        print("\n📋 BittyScout Job Recommendations:\n")
+    def __init__(self, save_to_file: bool = True):
+        self.output_path = "outputs/jobs_output.json"
+        os.makedirs(os.path.dirname(self.output_path), exist_ok=True)
+        self.save_to_file = save_to_file
+
+    def display(self, jobs):
+        print("\n🎯 Matched Job Results:\n")
+
         for i, job in enumerate(jobs, 1):
-            print(f"### {i}. {job['title']} at {job['company']}")
-            print(f"- 🌍 Location: {job['location']}")
-            print(f"- 🔗 [View Job]({job['url']})")
-            print(f"- 🧠 Score: {job['score']}")
-            print(f"- 📄 {job['description']}")
-            if "summary" in job:
-                print("\n📝 Summary:")
-                print(job['summary'])
-            print("\n---\n")
+            print(f"{i}. {job['title']} at {job['company']}")
+            print(f"   📍 Location: {job.get('location', 'N/A')}")
+            print(f"   🔗 Link: {job['url']}\n")
+
+        if self.save_to_file:
+            with open(self.output_path, "w") as f:
+                json.dump(jobs, f, indent=2)
+            print(f"💾 Jobs saved to: {self.output_path}")

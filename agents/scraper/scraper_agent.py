@@ -1,37 +1,29 @@
 # agents/scraper/scraper_agent.py
 
 from typing import List, Dict
+from agents.scraper.sources.recruitee_scraper import scrape_recruitee_jobs
+from agents.scraper.sources.lever_scraper import scrape_lever_jobs
+from agents.scraper.sources.workable_scraper import scrape_workable_jobs
 
 class ScraperAgent:
     def __init__(self):
         pass
 
     def get_jobs(self) -> List[Dict]:
-        # In the future, this will scrape real websites or use APIs
-        print("🌐 ScraperAgent: Generating mock job listings...")
+        print("🌐 ScraperAgent: Collecting jobs from supported boards...")
 
-        jobs = [
-            {
-                "title": "AI Research Engineer",
-                "company": "OpenAI",
-                "location": "Remote",
-                "description": "Work on state-of-the-art generative models.",
-                "url": "https://example.com/job/openai-ai-research"
-            },
-            {
-                "title": "Product Manager - AI",
-                "company": "Anthropic",
-                "location": "Remote",
-                "description": "Lead product for large-scale language model services.",
-                "url": "https://example.com/job/anthropic-pm"
-            },
-            {
-                "title": "Full Stack Developer",
-                "company": "Startup Inc.",
-                "location": "New York, NY",
-                "description": "Develop and maintain web applications.",
-                "url": "https://example.com/job/startup-dev"
-            }
-        ]
+        # Recruitee Jobs
+        recruitee_jobs = scrape_recruitee_jobs()
+        print(f"✅ Recruitee: Found {len(recruitee_jobs)} job(s)")
 
-        return jobs
+        # Workable Jobs
+        workable_jobs = scrape_workable_jobs()
+        print(f"✅ Workable: Found {len(workable_jobs)} job(s)")
+
+        # Lever Jobs
+        lever_jobs = scrape_lever_jobs()
+        print(f"✅ Lever: Found {len(lever_jobs)} job(s)")
+
+        # Combine all jobs into one list
+        all_jobs = recruitee_jobs + workable_jobs + lever_jobs
+        return all_jobs

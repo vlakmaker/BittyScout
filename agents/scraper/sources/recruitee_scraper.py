@@ -8,7 +8,7 @@ def scrape_recruitee_jobs() -> List[Dict]:
 
     known_companies = [
         "deliverect", "teamleader", "novemberfive", "onetribe", "visma", "channable",
-        "silverfin", "showpad", "abo", "mealhero"
+        "silverfin", "showpad", "abo", "mealhero", "faktionbv1"
     ]
 
     jobs = []

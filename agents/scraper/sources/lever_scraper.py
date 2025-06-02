@@ -7,7 +7,7 @@ def scrape_lever_jobs() -> List[Dict]:
     print("🔎 LeverScraper: Searching for companies...")
 
     known_lever_companies = [
-        "deliverect", "dataroots", "silverfin", "intigriti", "channable"
+        "deliverect", "silverfin", "intigriti", "channable"
     ]
 
     jobs = []

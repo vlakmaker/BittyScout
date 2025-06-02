@@ -2,3 +2,5 @@ requests
 beautifulsoup4
 openai==0.28.1
 pyyaml
+sentence-transformers
+yagmail

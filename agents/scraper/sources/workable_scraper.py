@@ -7,7 +7,7 @@ def scrape_workable_jobs() -> List[Dict]:
     print("🔎 WorkableScraper: Searching for companies...")
 
     known_workable_companies = [
-        "intigriti", "dataroots", "unifly", "intigriti", "ogone"
+        "novemberfive", "dataroots", "unifly", "intigriti", "ogone"
     ]
 
     jobs = []

@@ -1,0 +1,28 @@
+recruitee_companies:
+  - recruitee
+  - robovision
+  - faktionbv1
+  - legalfly
+  - daltix
+lever_companies:
+  - deliverect
+  - silverfin
+workable_companies:
+  - novemberfive
+  - sinch
+Personio:
+  - mimi
+  - wwf-belgium
+  - stanley-stella
+  - aeceuropes
+  - technopolis-group
+  - sensorfact
+Greenhouse:
+  - topcompare
+  - dataroots
+  - trustpilot
+# New section for the aggregator API
+JSearch:
+  - AI Engineer in Belgium
+  - Data Scientist in Belgium
+  - Machine Learning, Antwerp

@@ -1,169 +1,140 @@
+# utils/db_utils.py
+
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
-# --- Database Configuration ---
+# --- Database Setup ---
+DB_NAME = os.getenv("DB_NAME", "bittyscout.db")
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-DB_NAME = os.getenv("BITTYSCOUT_DB_NAME", "bittyscout.db")
 DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
 
-
 def get_db_connection():
+    """Establishes a connection to the SQLite database."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def create_jobs_table_if_not_exist():
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    """Creates the 'jobs' table with all required columns for all agents."""
     try:
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS jobs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                job_url TEXT UNIQUE NOT NULL,
-                platform_job_id TEXT,
-                platform_source TEXT NOT NULL,
-                company_name TEXT,
-                title TEXT NOT NULL,
-                location TEXT,
-                department TEXT,
-                date_posted_on_platform TEXT,
-                date_fetched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                last_seen_on_platform TIMESTAMP,
-                api_provided_description TEXT,
-                full_description_text TEXT,
-                is_relevant_to_criteria BOOLEAN,
-                ai_relevance_score REAL,
-                ai_filter_model_used TEXT,
-                llm_summary TEXT,
-                summarizer_model_used TEXT,
-                sent_in_digest_at TIMESTAMP,
-                CONSTRAINT unique_job_on_platform UNIQUE (platform_source, platform_job_id)
-            );
-        ''')
-
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_jobs_job_url ON jobs (job_url);')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_jobs_platform_id ON jobs (platform_source, platform_job_id);')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_jobs_needs_filtering ON jobs (is_relevant_to_criteria, date_fetched);')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_jobs_needs_summary ON jobs (is_relevant_to_criteria, llm_summary, date_fetched);')
-
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        create_table_sql = """
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            job_url TEXT NOT NULL UNIQUE,
+            platform_job_id TEXT,
+            platform_source TEXT NOT NULL,
+            company_name TEXT,
+            title TEXT NOT NULL,
+            location TEXT,
+            department TEXT,
+            date_posted_on_platform TEXT,
+            date_fetched TEXT NOT NULL,
+            last_seen_on_platform TEXT NOT NULL,
+            api_provided_description TEXT,
+            full_description_text TEXT,
+            is_relevant BOOLEAN DEFAULT NULL,
+            relevance_score REAL DEFAULT 0.0,
+            tags TEXT,
+            notified_on TEXT DEFAULT NULL
+        );
+        """
+        cursor.execute(create_table_sql)
         conn.commit()
-        print(f"✅ BittyScout 'jobs' table ensured in '{DB_PATH}'")
-    except Exception as e:
-        print(f"❌ ERROR creating jobs table: {e}")
-    finally:
         conn.close()
-
+        print(f"✅ BittyScout 'jobs' table ensured in '{DB_PATH}'")
+    except sqlite3.Error as e:
+        print(f"❌ ERROR creating jobs table: {e}")
+        exit(1)
 
 def add_or_update_job(job_data: dict) -> tuple[str, int | None]:
+    """Inserts a new job or updates the last_seen_on_platform timestamp."""
     conn = get_db_connection()
     cursor = conn.cursor()
+    now_iso = datetime.now(timezone.utc).isoformat()
     job_url = job_data.get("job_url")
-    if not job_url:
-        return "error_no_url", None
-
-    now = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-
     try:
         cursor.execute("SELECT id FROM jobs WHERE job_url = ?", (job_url,))
-        row = cursor.fetchone()
-
-        if row:
-            cursor.execute("UPDATE jobs SET last_seen_on_platform = ? WHERE id = ?", (now, row["id"]))
+        existing_job = cursor.fetchone()
+        if existing_job:
+            job_id = existing_job['id']
+            cursor.execute("UPDATE jobs SET last_seen_on_platform = ? WHERE id = ?", (now_iso, job_id))
             conn.commit()
-            return "updated_seen", row["id"]
-
-        cursor.execute('''
+            return "updated", job_id
+        else:
+            insert_sql = """
             INSERT INTO jobs (
-                job_url, platform_job_id, platform_source, company_name, title, location, department,
-                date_posted_on_platform, api_provided_description, full_description_text,
-                date_fetched, last_seen_on_platform
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            job_data["job_url"], job_data.get("platform_job_id"), job_data.get("platform_source", "Unknown"),
-            job_data.get("company_name"), job_data.get("title", "No Title"), job_data.get("location"),
-            job_data.get("department"), job_data.get("date_posted_on_platform"),
-            job_data.get("api_provided_description"), job_data.get("full_description_text"),
-            now, now
-        ))
-        conn.commit()
-        return "inserted", cursor.lastrowid
-
-    except sqlite3.IntegrityError:
-        return "integrity_error", None
-    except Exception as e:
-        print(f"❌ ERROR add_or_update_job: {e}")
+                job_url, platform_job_id, platform_source, company_name, title, 
+                location, department, date_posted_on_platform, date_fetched, 
+                last_seen_on_platform, api_provided_description, full_description_text
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """
+            data_tuple = (
+                job_url, job_data.get("platform_job_id"), job_data.get("platform_source"),
+                job_data.get("company_name"), job_data.get("title"), job_data.get("location"),
+                job_data.get("department"), job_data.get("date_posted_on_platform"),
+                now_iso, now_iso, job_data.get("api_provided_description"),
+                job_data.get("full_description_text")
+            )
+            cursor.execute(insert_sql, data_tuple)
+            new_job_id = cursor.lastrowid
+            conn.commit()
+            return "inserted", new_job_id
+    except sqlite3.Error as e:
+        print(f"❌ Database error for job '{job_url}': {e}")
         return "error", None
     finally:
         conn.close()
 
-
-def get_jobs_for_filtering(limit: int = 10) -> list[dict]:
+def get_unprocessed_jobs() -> list[sqlite3.Row]:
+    """Fetches jobs that have not been processed by the Filter Agent."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        cursor.execute('''
-            SELECT id, job_url, title, full_description_text, api_provided_description
-            FROM jobs WHERE is_relevant_to_criteria IS NULL
-            ORDER BY date_fetched DESC LIMIT ?
-        ''', (limit,))
-        return [dict(row) for row in cursor.fetchall()]
-    except Exception as e:
-        print(f"❌ ERROR get_jobs_for_filtering: {e}")
-        return []
-    finally:
-        conn.close()
+    query = "SELECT id, title, api_provided_description, full_description_text FROM jobs WHERE is_relevant IS NULL"
+    cursor.execute(query)
+    jobs = cursor.fetchall()
+    conn.close()
+    return jobs
 
-
-def update_job_relevance(job_url: str, is_relevant: bool, score: float, model_used: str):
+def update_job_analysis(job_id: int, is_relevant: bool, relevance_score: float, tags: str):
+    """Updates a job record with the results from the Filter Agent."""
     conn = get_db_connection()
     cursor = conn.cursor()
+    update_sql = "UPDATE jobs SET is_relevant = ?, relevance_score = ?, tags = ? WHERE id = ?"
     try:
-        cursor.execute('''
-            UPDATE jobs SET is_relevant_to_criteria = ?, ai_relevance_score = ?, ai_filter_model_used = ?
-            WHERE job_url = ?
-        ''', (is_relevant, score, model_used, job_url))
+        cursor.execute(update_sql, (is_relevant, relevance_score, tags, job_id))
         conn.commit()
-    except Exception as e:
-        print(f"❌ ERROR update_job_relevance: {e}")
     finally:
         conn.close()
 
+# --- Functions for the Notifier Agent ---
 
-def get_jobs_for_summarizing(limit: int = 5) -> list[dict]:
+def get_new_relevant_jobs() -> list[sqlite3.Row]:
+    """Fetches relevant jobs that have not been notified about yet."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        cursor.execute('''
-            SELECT id, job_url, title, company_name, full_description_text, api_provided_description
-            FROM jobs
-            WHERE is_relevant_to_criteria = TRUE AND llm_summary IS NULL
-            ORDER BY date_fetched DESC LIMIT ?
-        ''', (limit,))
-        return [dict(row) for row in cursor.fetchall()]
-    except Exception as e:
-        print(f"❌ ERROR get_jobs_for_summarizing: {e}")
-        return []
-    finally:
-        conn.close()
+    query = """
+    SELECT title, company_name, location, job_url, relevance_score, tags
+    FROM jobs WHERE is_relevant = 1 AND notified_on IS NULL
+    ORDER BY relevance_score DESC, date_fetched DESC
+    """
+    cursor.execute(query)
+    jobs = cursor.fetchall()
+    conn.close()
+    return jobs
 
-
-def update_job_summary(job_url: str, summary_text: str, model_used: str):
+def mark_jobs_as_notified(job_urls: list[str]):
+    """Updates the notified_on timestamp for a list of job URLs."""
+    if not job_urls: return
+    now_iso = datetime.now(timezone.utc).isoformat()
     conn = get_db_connection()
     cursor = conn.cursor()
+    placeholders = ','.join('?' for _ in job_urls)
+    update_sql = f"UPDATE jobs SET notified_on = ? WHERE job_url IN ({placeholders})"
     try:
-        cursor.execute('''
-            UPDATE jobs SET llm_summary = ?, summarizer_model_used = ? WHERE job_url = ?
-        ''', (summary_text, model_used, job_url))
+        cursor.execute(update_sql, [now_iso] + job_urls)
         conn.commit()
-    except Exception as e:
-        print(f"❌ ERROR update_job_summary: {e}")
     finally:
         conn.close()
-
-
-if __name__ == "__main__":
-    print("--- Running BittyScout DB Init ---")
-    print(f"Database Path: {DB_PATH}")
-    create_jobs_table_if_not_exist()

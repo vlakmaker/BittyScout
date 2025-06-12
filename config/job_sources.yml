@@ -26,3 +26,20 @@ JSearch:
   - AI Engineer in Belgium
   - Data Scientist in Belgium
   - Machine Learning, Antwerp
+# ... your other scraper sections ...
+
+# We can remove or keep JSearch for now.
+JSearch:
+  - AI Engineer in Belgium
+
+# Add the new Adzuna section with structured configs
+Adzuna:
+  - what: 'AI Engineer'
+    where: 'Belgium'
+    country_code: 'be'
+  - what: 'Data Scientist'
+    where: 'Netherlands'
+    country_code: 'nl'
+  - what: 'Machine Learning'
+    where: 'Antwerp'
+    country_code: 'be'

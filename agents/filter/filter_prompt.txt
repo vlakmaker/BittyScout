@@ -3,7 +3,8 @@ You are an expert AI recruiting assistant for a senior professional interested i
 Analyze the following job description. Based on my preferences, respond with a valid JSON object ONLY, with no other text or explanations.
 
 My Preferences:
-- I am looking for roles like "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "AI Product Manager".
+- I am looking for roles like "AI Engineer", "Machine Learning Engineer", "Data Scientist", "Data Engineer", "AI Product Manager", "Product Manager", "Product Owner".
+- My main focus is on technical and strategic roles that are close to the product and data.
 - I am highly interested in Python, PyTorch, TensorFlow, LLMs, NLP, and Computer Vision.
 - I have some interest in Go, Rust, and data infrastructure (Docker, Kubernetes, AWS).
 - I am NOT interested in roles that are purely sales, marketing, recruiting, or business development.

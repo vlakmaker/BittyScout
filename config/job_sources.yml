@@ -4,29 +4,24 @@ Recruitee:
   - faktionbv1
   - legalfly
   - daltix
+  - qollabi
 Lever:
   - deliverect
   - silverfin
+  - wandb
 Workable:
   - novemberfive
   - sinch
-Personio:
-  - mimi
-  - wwf-belgium
-  - stanley-stella
-  - aeceuropes
-  - technopolis-group
-  - sensorfact
+  - boardofinnovation
+  - mimica
+#Personio:
+
 Greenhouse:
-  - topcompare
-  - dataroots
-  - trustpilot
+  - showpad
+  - assemblyai
+  - algolia
 # New section for the aggregator API
-JSearch:
-  - AI Engineer in Belgium
-  - Data Scientist in Belgium
-  - Machine Learning, Antwerp
-# ... your other scraper sections ...
+
 
 # We can remove or keep JSearch for now.
 JSearch:
@@ -34,12 +29,30 @@ JSearch:
 
 # Add the new Adzuna section with structured configs
 Adzuna:
-  - what: 'AI Engineer'
-    where: 'Belgium'
-    country_code: 'be'
-  - what: 'Data Scientist'
+  - what: 'AI '
     where: 'Netherlands'
     country_code: 'nl'
-  - what: 'Machine Learning'
-    where: 'Antwerp'
+  - what: 'Product Manager'
+    where: 'Belgium'
     country_code: 'be'
+  - what: 'AI'
+    where: 'Belgium'
+    country_code: 'be'
+
+# Add the new, working scraper
+"JOIN.com":
+  - query: 'AI'
+    country_code: 'BE' # Belgium
+  - query: 'Product Manager'
+    country_code: 'NL' # Netherlands
+# In config/job_sources.yml
+# ... (your other scraper sections)
+
+# This is a query-based scraper, like Adzuna
+WelcomeToTheJungle:
+  - query: 'AI'
+    location: 'belgium' # WTTJ uses lowercase location slugs
+  - query: 'AI'
+    location: 'netherlands'
+  - query: 'Product'
+    location: 'belgium'

@@ -9,6 +9,11 @@ from agents.scraper.sources.recruitee_scraper import RecruiteeScraper
 from agents.scraper.sources.lever_scraper import LeverScraper
 from agents.scraper.sources.greenhouse_scraper import GreenhouseScraper
 from agents.scraper.sources.adzuna_scraper import AdzunaScraper
+from agents.scraper.sources.wttj_scraper import WelcomeToTheJungleScraper
+from agents.scraper.sources.jsearch_scraper import JsearchScraper
+from agents.scraper.sources.personio_scraper import PersonioScraper
+from agents.scraper.sources.workable_scraper import WorkableScraper
+from agents.scraper.sources.join_scraper import JoinScraper # <-- ADD THIS IMPORT
 # Add new scrapers here as you build them
 
 # --- Bitty's Scraper Registry ---
@@ -17,8 +22,11 @@ SCRAPER_REGISTRY = {
     "Lever": LeverScraper,
     "Greenhouse": GreenhouseScraper,
     "Adzuna": AdzunaScraper,
-    # "JSearch": JsearchScraper, # Add when ready
-    # "Personio": PersonioScraper, # Add when ready
+    "WelcomeToTheJungle": WelcomeToTheJungleScraper, # <-- ADD THIS LINE
+    "JSearch": JsearchScraper, # Add when ready
+    "Workable": WorkableScraper, # Add this
+    "Personio": PersonioScraper, # Add when ready
+    "JOIN.com": JoinScraper, # <-- ADD THIS LINE
 }
 
 class ScraperAgent:

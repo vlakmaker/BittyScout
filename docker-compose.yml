@@ -1,0 +1,40 @@
+services:
+  # The API container (no longer does heavy work)
+  bittyscout-api:
+    build: .
+    container_name: bittyscout-api
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    ports:
+      - "8000:8000"
+    # This is important: it needs to wait for Redis to be healthy
+    depends_on:
+      - redis
+    networks:
+      - traefik
+
+  # --- NEW: The Celery Worker ---
+  worker:
+    build: .
+    container_name: bittyscout-worker
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    # The command to start the worker
+    command: celery -A tasks worker --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - traefik
+
+  # --- NEW: The Redis Message Broker ---
+  redis:
+    image: "redis:alpine"
+    container_name: bittyscout-redis
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true

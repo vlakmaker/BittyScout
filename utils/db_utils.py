@@ -1,4 +1,4 @@
-# utils/db_utils.py
+# FILE: utils/db_utils.py
 
 import sqlite3
 import os
@@ -12,6 +12,7 @@ DB_PATH = os.path.join(PROJECT_ROOT, DB_NAME)
 def get_db_connection():
     """Establishes a connection to the SQLite database."""
     conn = sqlite3.connect(DB_PATH)
+    # This row_factory is still useful for accessing columns by name.
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -44,7 +45,8 @@ def create_jobs_table_if_not_exist():
         cursor.execute(create_table_sql)
         conn.commit()
         conn.close()
-        print(f"✅ BittyScout 'jobs' table ensured in '{DB_PATH}'")
+        # Changed from "ensured in '{DB_PATH}'" to be container-friendly
+        print("✅ BittyScout 'jobs' table ensured.")
     except sqlite3.Error as e:
         print(f"❌ ERROR creating jobs table: {e}")
         exit(1)
@@ -66,8 +68,8 @@ def add_or_update_job(job_data: dict) -> tuple[str, int | None]:
         else:
             insert_sql = """
             INSERT INTO jobs (
-                job_url, platform_job_id, platform_source, company_name, title, 
-                location, department, date_posted_on_platform, date_fetched, 
+                job_url, platform_job_id, platform_source, company_name, title,
+                location, department, date_posted_on_platform, date_fetched,
                 last_seen_on_platform, api_provided_description, full_description_text
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
@@ -88,15 +90,17 @@ def add_or_update_job(job_data: dict) -> tuple[str, int | None]:
     finally:
         conn.close()
 
-def get_unprocessed_jobs() -> list[sqlite3.Row]:
+def get_unprocessed_jobs() -> list[dict]: # <-- Changed return type annotation
     """Fetches jobs that have not been processed by the Filter Agent."""
     conn = get_db_connection()
     cursor = conn.cursor()
     query = "SELECT id, title, api_provided_description, full_description_text FROM jobs WHERE is_relevant IS NULL"
     cursor.execute(query)
-    jobs = cursor.fetchall()
+    rows = cursor.fetchall()
     conn.close()
-    return jobs
+    # --- THIS IS THE FIX ---
+    # Convert sqlite3.Row objects to standard Python dictionaries
+    return [dict(row) for row in rows]
 
 def update_job_analysis(job_id: int, is_relevant: bool, relevance_score: float, tags: str):
     """Updates a job record with the results from the Filter Agent."""
@@ -111,7 +115,7 @@ def update_job_analysis(job_id: int, is_relevant: bool, relevance_score: float, 
 
 # --- Functions for the Notifier Agent ---
 
-def get_new_relevant_jobs() -> list[sqlite3.Row]:
+def get_new_relevant_jobs() -> list[dict]: # <-- Changed return type annotation
     """Fetches relevant jobs that have not been notified about yet."""
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -121,9 +125,11 @@ def get_new_relevant_jobs() -> list[sqlite3.Row]:
     ORDER BY relevance_score DESC, date_fetched DESC
     """
     cursor.execute(query)
-    jobs = cursor.fetchall()
+    rows = cursor.fetchall()
     conn.close()
-    return jobs
+    # --- THIS IS THE FIX ---
+    # Convert sqlite3.Row objects to standard Python dictionaries
+    return [dict(row) for row in rows]
 
 def mark_jobs_as_notified(job_urls: list[str]):
     """Updates the notified_on timestamp for a list of job URLs."""

@@ -43,29 +43,28 @@ BittyScout is designed to run as a multi-container Docker application.
     `git clone https://github.com/vlakmaker/BittyScout.git
     cd BittyScout`
     
-    Use code [**with caution**](https://support.google.com/legal/answer/13505487).Bash
     
-2. **Create .env File**:Generated env
+    
+2. **Create .env File**
     
     Create a .env file in the BittyScout root directory. This file stores all your secrets and configurations.
     
-    `# --- LLM API Keys ---
+  
     OPENROUTER_API_KEY=your_openrouter_key
     GROQ_API_KEY=your_groq_key
     
-    # --- Notification Service Keys ---
+    
     BREVO_API_KEY=your_brevo_key
     EMAIL_SENDER_EMAIL=your_verified_brevo_email
     EMAIL_RECIPIENT_EMAIL=your_email_to_receive_digest
     DISCORD_WEBHOOK_URL=your_discord_webhook_url
-    
-    # --- Database Name ---
+
     DB_NAME=bittyscout.db
     
-    # --- Redis URL (for Celery) ---
+    
     REDIS_URL=redis://bittyscout-redis:6379/0`
     
-    Use code [**with caution**](https://support.google.com/legal/answer/13505487).Env
+
     
 3. **Job Sources**:
     
@@ -95,21 +94,19 @@ BittyScout now runs as three coordinated services defined in docker-compose.yml
 
 From the BittyScout root directory, run:
 
-Generated bash
 
 `sudo docker-compose up --build -d`
 
-Use code [**with caution**](https://support.google.com/legal/answer/13505487).Bash
+
 
 This will build the Docker image and start all three services in the background.
 
 ### To Stop the Services:
 
-Generated bash
 
 `sudo docker-compose down`
 
-Use code [**with caution**](https://support.google.com/legal/answer/13505487).Bash
+
 
 # 🤖 Usage with n8n
 
@@ -137,7 +134,7 @@ Generated bash
 python logic.py scrape --source Greenhouse
 python logic.py filter`
 
-Use code [**with caution**](https://support.google.com/legal/answer/13505487).Bash
+
 
 # 📁 Folder Structure
 
@@ -161,4 +158,4 @@ Use code [**with caution**](https://support.google.com/legal/answer/13505487).B
 
 🧠 *Made with curiosity, frustration with job boards, and a stubborn desire to build something useful. From an information geek who's learning as they go.*
 
-📮 **Contact**: Want to build something similar? Find me on [**LinkedIn**](https://www.google.com/url?sa=E&q=your-linkedin-url) or check out [**bittygpt.com**](https://www.google.com/url?sa=E&q=https%3A%2F%2Fwww.bittygpt.com).
+📮 **Contact**: Want to build something similar? Find me on [**LinkedIn**](https://www.linkedin.com/in/vlakmaker/) or check out [**bittygpt.com**](www.bittygpt.com).
